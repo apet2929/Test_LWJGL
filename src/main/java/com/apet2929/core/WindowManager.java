@@ -1,5 +1,6 @@
 package com.apet2929.core;
 
+import com.apet2929.core.utils.Consts;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -8,11 +9,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
-public class WindowManager {
+import static com.apet2929.core.utils.Consts.*;
 
-    private static final float FOV = (float) Math.toRadians(60);
-    private static final float Z_NEAR = 0.01f;
-    private static final float Z_FAR = 1000f;
+public class WindowManager {
 
     private final String title;
 

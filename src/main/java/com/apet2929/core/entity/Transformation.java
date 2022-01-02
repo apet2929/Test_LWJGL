@@ -3,7 +3,6 @@ package com.apet2929.core.entity;
 import com.apet2929.core.Camera;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.system.CallbackI;
 
 public class Transformation {
     public static Matrix4f createTransformationMatrix(Entity entity) {

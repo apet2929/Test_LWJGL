@@ -1,5 +1,6 @@
 package com.apet2929.core;
 
+import com.apet2929.core.mouse.MouseInput;
 import com.apet2929.core.utils.Consts;
 import com.apet2929.test.Launcher;
 import org.lwjgl.glfw.GLFW;
@@ -17,14 +18,16 @@ public class EngineManager {
     private WindowManager window;
     private GLFWErrorCallback errorCallback;
     private ILogic gameLogic;
+    private MouseInput mouseInput;
 
     private void init() throws Exception {
         GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
         window = Launcher.getWindow();
         gameLogic = Launcher.getGame();
+        mouseInput = new MouseInput();
         window.init();
         gameLogic.init();
-
+        mouseInput.init();
     }
 
     public void start() throws Exception {
@@ -37,16 +40,21 @@ public class EngineManager {
 
     public void run() {
         this.isRunning = true;
+
         int frames = 0;
         long frameCounter = 0;
+
         long lastTime = System.nanoTime();
         double unprocessedTime = 0;
 
+//        Rendering loop
         while(isRunning){
             boolean render = false;
+
             long startTime = System.nanoTime();
             long passedTime = startTime - lastTime;
             lastTime = startTime;
+
             unprocessedTime += passedTime / (double) NANOSECOND;
             frameCounter += passedTime;
 
@@ -55,7 +63,6 @@ public class EngineManager {
             while(unprocessedTime > frametime){
                 render = true;
                 unprocessedTime -= frametime;
-
 
                 if(window.windowShouldClose())
                     stop();
@@ -84,6 +91,7 @@ public class EngineManager {
     }
 
     private void input(){
+        mouseInput.input();
         gameLogic.input();
     }
 
@@ -93,7 +101,7 @@ public class EngineManager {
     }
 
     private void update() {
-        gameLogic.update();
+        gameLogic.update(mouseInput);
     }
 
     private void cleanup(){

@@ -4,14 +4,19 @@ import com.apet2929.core.*;
 import com.apet2929.core.entity.Entity;
 import com.apet2929.core.entity.Model;
 import com.apet2929.core.entity.Texture;
+import com.apet2929.core.mouse.MouseInput;
+import com.apet2929.core.utils.Consts;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.system.CallbackI;
+
+import static com.apet2929.core.utils.Consts.CAMERA_STEP;
+import static com.apet2929.core.utils.Consts.MOUSE_SENSITIVITY;
 
 public class TestGame implements ILogic{
 
-    private static final float CAMERA_MOVE_SPEED = 0.05f;
+
 
     private final RenderManager renderer;
     private final ObjectLoader loader;
@@ -112,12 +117,20 @@ public class TestGame implements ILogic{
         if(window.isKeyPressed(GLFW.GLFW_KEY_X))
             cameraInc.y = 1;
 
+        if(window.isKeyPressed(GLFW.GLFW_KEY_ENTER))
+            System.out.println(cameraInc);
+
     }
 
     @Override
-    public void update() {
-        camera.movePosition(cameraInc.x * CAMERA_MOVE_SPEED, cameraInc.y * CAMERA_MOVE_SPEED, cameraInc.z * CAMERA_MOVE_SPEED);
-        entity.incRotation(0.0f, 0.5f, 0.0f);
+    public void update(MouseInput mouseInput) {
+        camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
+//        entity.incRotation(0.0f, 0.5f, 0.0f);
+
+        if(mouseInput.isRightButtonPressed()) {
+            Vector2f rotVec = mouseInput.getDisplVec();
+            camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+        }
     }
 
     @Override
