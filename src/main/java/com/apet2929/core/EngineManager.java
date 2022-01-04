@@ -6,10 +6,10 @@ import com.apet2929.test.Launcher;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
+import static com.apet2929.core.utils.Consts.FRAMERATE;
+
 public class EngineManager {
     public static final long NANOSECOND = 1000000000L;
-
-    public static final float FRAMERATE = 1000;
     private static int fps;
     private static final float frametime = 1.0f / FRAMERATE;
 
@@ -58,8 +58,6 @@ public class EngineManager {
             unprocessedTime += passedTime / (double) NANOSECOND;
             frameCounter += passedTime;
 
-            input();
-
             while(unprocessedTime > frametime){
                 render = true;
                 unprocessedTime -= frametime;
@@ -76,6 +74,7 @@ public class EngineManager {
             }
 
             if(render) {
+                input();
                 update();
                 render();
                 frames++;

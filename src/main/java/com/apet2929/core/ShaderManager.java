@@ -113,6 +113,10 @@ public class ShaderManager {
         GL20.glUseProgram(programID);
     }
 
+    public boolean isBound(){
+        return GL20.glIsProgram(programID);
+    }
+
     public void unbind(){
         GL20.glUseProgram(0);
     }

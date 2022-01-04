@@ -29,6 +29,20 @@ public class RenderManager {
         shader.createUniform("viewMatrix");
     }
 
+    public void renderEntity(Entity entity, Camera camera) throws Exception {
+        if(canRender()) {
+            setEntityCameraUniforms(entity, camera);
+            bindEntityVertices(entity);
+            bindEntityTexture(entity);
+            drawEntity(entity);
+            cleanupRender();
+        }
+        else {
+            throwRenderNotStartedError();
+        }
+
+    }
+
     public void render(Entity entity, Camera camera){
         clear();
         shader.bind();
@@ -48,6 +62,50 @@ public class RenderManager {
         shader.unbind();
 
     }
+
+    public void beginRender() {
+        shader.bind();
+    }
+
+    public void endRender() {
+        shader.unbind();
+    }
+
+    private void setEntityCameraUniforms(Entity entity, Camera camera) {
+        shader.setUniform("textureSampler", 0);
+        shader.setUniform("transformationMatrix", Transformation.createTransformationMatrix(entity));
+        shader.setUniform("projectionMatrix", window.updateProjectionMatrix());
+        shader.setUniform("viewMatrix", Transformation.getViewMatrix(camera));
+    }
+
+    private void bindEntityVertices(Entity entity) {
+        GL30.glBindVertexArray(entity.getModel().getId());
+        GL20.glEnableVertexAttribArray(0);
+        GL20.glEnableVertexAttribArray(1);
+    }
+
+    private void bindEntityTexture(Entity entity) {
+        GL13.glActiveTexture(GL13.GL_TEXTURE0);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, entity.getModel().getTexture().getId());
+    }
+    private void drawEntity(Entity entity) {
+        GL11.glDrawElements(GL11.GL_TRIANGLES, entity.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+    }
+
+    private void cleanupRender() {
+        GL20.glDisableVertexAttribArray(0);
+        GL20.glDisableVertexAttribArray(1);
+        GL30.glBindVertexArray(0);
+    }
+
+    private boolean canRender() {
+        return shader.isBound();
+    }
+
+    private void throwRenderNotStartedError() throws Exception {
+        throw new Exception("beginRender() not called before renderEntity()!");
+    }
+
 
     public void clear(){
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);

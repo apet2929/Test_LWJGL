@@ -1,12 +1,15 @@
 package com.apet2929.core;
 
+import com.apet2929.core.entity.Cube;
 import com.apet2929.core.entity.Model;
 import com.apet2929.core.utils.Utils;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.CallbackI;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
@@ -28,6 +31,14 @@ public class ObjectLoader {
         storeDataInAttribList(1, 2, textureCoords);
         unbind();
         return new Model(id, indices.length);
+    }
+
+    public Cube loadCube(Vector3f position, Vector3f rotation, float scale) {
+        return new Cube(loadModel(Cube.vertices, Cube.textCoords, Cube.indices), position, rotation, scale);
+    }
+
+    public Cube loadCube() {
+        return new Cube(loadModel(Cube.vertices, Cube.textCoords, Cube.indices), new Vector3f(0,0,0), new Vector3f(0,0,0), 1);
     }
 
     public int loadTexture(String filename) throws Exception {
