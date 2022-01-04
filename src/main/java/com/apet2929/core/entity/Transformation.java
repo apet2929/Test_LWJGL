@@ -27,4 +27,5 @@ public class Transformation {
         matrix.translate(-pos.x, -pos.y, -pos.z);   //  Move the world opposite the camera
         return matrix;
     }
+
 }
