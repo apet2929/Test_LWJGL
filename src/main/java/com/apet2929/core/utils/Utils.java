@@ -2,11 +2,15 @@ package com.apet2929.core.utils;
 
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Utils {
@@ -37,5 +41,16 @@ public class Utils {
         }
         return result;
 
+    }
+
+    public static List<String> readAllLines(String filename) throws Exception {
+        List<String> lines = new ArrayList<>();
+        File file = new File(filename);
+        Scanner scanner = new Scanner(file);
+        while(scanner.hasNextLine()) {
+            lines.add(scanner.nextLine());
+        }
+        scanner.close();
+        return lines;
     }
 }

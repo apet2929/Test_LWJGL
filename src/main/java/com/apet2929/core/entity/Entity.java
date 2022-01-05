@@ -15,6 +15,13 @@ public class Entity {
         this.scale = scale;
     }
 
+    public Entity(Model model) {
+        this.model = model;
+        this.pos = new Vector3f(0.0f,0.0f,0.0f);
+        this.rotation = new Vector3f(0.0f,0.0f,0.0f);;
+        this.scale = 1.0f;
+    }
+
     public void inc_pos(float x, float y, float z){
         this.pos.x += x;
         this.pos.y += y;

@@ -5,10 +5,7 @@ import com.apet2929.core.entity.Model;
 import com.apet2929.core.entity.Transformation;
 import com.apet2929.core.utils.Utils;
 import com.apet2929.test.Launcher;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 
 public class RenderManager {
     private final WindowManager window;
@@ -80,8 +77,9 @@ public class RenderManager {
 
     private void bindEntityVertices(Entity entity) {
         GL30.glBindVertexArray(entity.getModel().getId());
-        GL20.glEnableVertexAttribArray(0);
-        GL20.glEnableVertexAttribArray(1);
+        GL20.glEnableVertexAttribArray(0);  //  Vertices
+        GL20.glEnableVertexAttribArray(1);  //  Texture coordinates
+        GL20.glEnableVertexAttribArray(2);  //  Normals
     }
 
     private void bindEntityTexture(Entity entity) {
@@ -96,6 +94,7 @@ public class RenderManager {
         GL20.glDisableVertexAttribArray(0);
         GL20.glDisableVertexAttribArray(1);
         GL30.glBindVertexArray(0);
+        GL30.glBindTexture(GL11.GL_TEXTURE_2D, 0);
     }
 
     private boolean canRender() {
@@ -105,7 +104,6 @@ public class RenderManager {
     private void throwRenderNotStartedError() throws Exception {
         throw new Exception("beginRender() not called before renderEntity()!");
     }
-
 
     public void clear(){
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);

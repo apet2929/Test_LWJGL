@@ -71,7 +71,7 @@ public class ShaderManager {
         fragmentShaderID = createShader(shaderCode, GL20.GL_FRAGMENT_SHADER);
     }
 
-    public int createShader(String shaderCode, int shaderType) throws Exception {
+    private int createShader(String shaderCode, int shaderType) throws Exception {
         int shaderID = GL20.glCreateShader(shaderType);
         if(shaderID == 0)
             throw new Exception("Error creating shader, type : " + shaderType);

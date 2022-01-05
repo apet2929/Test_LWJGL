@@ -1,12 +1,8 @@
 package com.apet2929.test;
 
 import com.apet2929.core.*;
-import com.apet2929.core.entity.Cube;
-import com.apet2929.core.entity.Entity;
-import com.apet2929.core.entity.Model;
-import com.apet2929.core.entity.Texture;
+import com.apet2929.core.entity.*;
 import com.apet2929.core.mouse.MouseInput;
-import com.apet2929.core.utils.Consts;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -20,11 +16,10 @@ public class TestGame implements ILogic{
 
 
     private final RenderManager renderer;
-    private final ObjectLoader loader;
+    private final ModelLoader loader;
     private final WindowManager window;
 
-    private Cube cube;
-    private Cube cube2;
+    private Entity complexModelEntity;
     private Camera camera;
 
     Vector3f cameraInc;
@@ -32,7 +27,7 @@ public class TestGame implements ILogic{
     public TestGame(){
         renderer = new RenderManager();
         window = Launcher.getWindow();
-        loader = new ObjectLoader();
+        loader = new ModelLoader();
         camera = new Camera();
         cameraInc = new Vector3f(0,0,0);
     }
@@ -41,10 +36,14 @@ public class TestGame implements ILogic{
     public void init() throws Exception {
         renderer.init();
         //  Cube
-        cube = loader.loadCube();
-        cube2 = loader.loadCube(new Vector3f(1.0f,0.0f,0.0f), new Vector3f(0.0f,0.0f,0.0f), 2);
-        cube.getModel().setTexture(new Texture(loader.loadTexture("textures/tree.png")));
-        cube2.getModel().setTexture(new Texture(loader.loadTexture("textures/dirt.png")));
+//        cube = loader.loadCube();
+//        cube2 = loader.loadCube(new Vector3f(1.0f,0.0f,0.0f), new Vector3f(0.0f,0.0f,0.0f), 2);
+//        cube.getModel().setTexture(new Texture(loader.loadTexture("textures/tree.png")));
+//        cube2.getModel().setTexture(new Texture(loader.loadTexture("textures/dirt.png")));
+        Model complexModel = loader.createModelFromFile("textures/penis.obj");
+        complexModel.setTexture(new Texture(loader.loadTexture("textures/dirt.png")));
+        complexModelEntity = new Entity(complexModel);
+
     }
 
     @Override
@@ -92,8 +91,8 @@ public class TestGame implements ILogic{
         renderer.clear();
         renderer.beginRender();
         try {
-            renderer.renderEntity(cube, camera);
-            renderer.renderEntity(cube2, camera);
+            renderer.renderEntity(complexModelEntity, camera);
+//            renderer.renderEntity(cube2, camera);
         } catch (Exception e) {
             e.printStackTrace();
         }
