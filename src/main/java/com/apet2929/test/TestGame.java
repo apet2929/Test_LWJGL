@@ -7,6 +7,9 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.system.CallbackI;
+
+import java.awt.*;
 
 import static com.apet2929.core.utils.Consts.CAMERA_STEP;
 import static com.apet2929.core.utils.Consts.MOUSE_SENSITIVITY;
@@ -21,8 +24,10 @@ public class TestGame implements ILogic{
 
     private Entity complexModelEntity;
     private Camera camera;
+    private PointLight light;
 
     Vector3f cameraInc;
+    Vector3f ambientLight;
 
     public TestGame(){
         renderer = new RenderManager();
@@ -35,15 +40,16 @@ public class TestGame implements ILogic{
     @Override
     public void init() throws Exception {
         renderer.init();
-        //  Cube
-//        cube = loader.loadCube();
-//        cube2 = loader.loadCube(new Vector3f(1.0f,0.0f,0.0f), new Vector3f(0.0f,0.0f,0.0f), 2);
-//        cube.getModel().setTexture(new Texture(loader.loadTexture("textures/tree.png")));
-//        cube2.getModel().setTexture(new Texture(loader.loadTexture("textures/dirt.png")));
-        Model complexModel = loader.createModelFromFile("textures/penis.obj");
-        complexModel.setTexture(new Texture(loader.loadTexture("textures/dirt.png")));
+
+        final Texture dirt = new Texture(loader.loadTexture("textures/dirt.png"));
+        Material material = new Material(dirt, 5.0f);
+        Model complexModel = loader.createModelFromFile("textures/pp.obj");
+        complexModel.setMaterial(material);
         complexModelEntity = new Entity(complexModel);
 
+        PointLight.Attenuation att = new PointLight.Attenuation(1.0f, 0.5f, 0.5f);
+        light = new PointLight(new Vector3f(10.0f, 0, 0), new Vector3f(3.0f, 3.0f, 0.0f), 0.5f, att);
+        ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
     }
 
     @Override
@@ -72,7 +78,11 @@ public class TestGame implements ILogic{
 
     @Override
     public void update(MouseInput mouseInput) {
+
+        //  TODO : Figure out how I broke the camera movement
+
         camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
+
 
         if(mouseInput.isLeftButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
@@ -90,9 +100,10 @@ public class TestGame implements ILogic{
         window.setClearColour(0.0f, 0.0f, 0.0f, 0.0f);
         renderer.clear();
         renderer.beginRender();
+
         try {
+            renderer.setLighting(light, ambientLight, camera);
             renderer.renderEntity(complexModelEntity, camera);
-//            renderer.renderEntity(cube2, camera);
         } catch (Exception e) {
             e.printStackTrace();
         }

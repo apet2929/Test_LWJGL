@@ -2,17 +2,26 @@ package com.apet2929.core;
 
 import com.apet2929.core.entity.Entity;
 import com.apet2929.core.entity.Model;
+import com.apet2929.core.entity.PointLight;
 import com.apet2929.core.entity.Transformation;
 import com.apet2929.core.utils.Utils;
 import com.apet2929.test.Launcher;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.*;
+
+import java.awt.*;
 
 public class RenderManager {
     private final WindowManager window;
     private ShaderManager shader;
 
+    private float specularPower;
+
     public RenderManager(){
         window = Launcher.getWindow();
+        specularPower = 10f;
     }
 
     public void init() throws Exception {
@@ -24,6 +33,13 @@ public class RenderManager {
         shader.createUniform("transformationMatrix");
         shader.createUniform("projectionMatrix");
         shader.createUniform("viewMatrix");
+//        Materials
+        shader.createMaterialUniform("material");
+
+//        Lighting
+        shader.createUniform("specularPower");
+        shader.createUniform("ambientLight");
+        shader.createPointLightUniform("pointLight");
     }
 
     public void renderEntity(Entity entity, Camera camera) throws Exception {
@@ -38,6 +54,14 @@ public class RenderManager {
             throwRenderNotStartedError();
         }
 
+    }
+
+    public void setLighting(PointLight pointLight, Vector3f ambientLight, Camera camera) throws Exception{
+        if(canRender()) {
+            setLightUniforms(pointLight, ambientLight, Transformation.getViewMatrix(camera));
+        } else {
+            throwRenderNotStartedError();
+        }
     }
 
     public void render(Entity entity, Camera camera){
@@ -62,6 +86,7 @@ public class RenderManager {
 
     public void beginRender() {
         shader.bind();
+
     }
 
     public void endRender() {
@@ -73,6 +98,17 @@ public class RenderManager {
         shader.setUniform("transformationMatrix", Transformation.createTransformationMatrix(entity));
         shader.setUniform("projectionMatrix", window.updateProjectionMatrix());
         shader.setUniform("viewMatrix", Transformation.getViewMatrix(camera));
+        shader.setUniform("material", entity.getModel().getMaterial());
+    }
+
+    private void setLightUniforms(PointLight light, Vector3f ambientLight, Matrix4f viewMatrix) {
+        shader.setUniform("ambientLight", ambientLight);
+        shader.setUniform("specularPower", specularPower);
+
+
+        PointLight viewLight = light.ToViewCoordinates(viewMatrix);
+        shader.setUniform("pointLight", viewLight);
+
     }
 
     private void bindEntityVertices(Entity entity) {
