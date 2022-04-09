@@ -1,8 +1,5 @@
 package com.apet2929.core.entity;
 
-import com.apet2929.core.entity.Cube;
-import com.apet2929.core.entity.Face;
-import com.apet2929.core.entity.Model;
 import com.apet2929.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;

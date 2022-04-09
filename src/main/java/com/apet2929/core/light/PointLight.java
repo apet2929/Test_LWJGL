@@ -1,10 +1,7 @@
-package com.apet2929.core.entity;
+package com.apet2929.core.light;
 
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
-import org.lwjgl.system.CallbackI;
 
 public class PointLight {
 
@@ -14,14 +11,6 @@ public class PointLight {
         private final float exponent;
 
         public Attenuation(float constant, float linear, float exponent) {
-             /*
-                struct Attenuation
-                {
-                    float constant;
-                    float linear;
-                    float exponent;
-                };
-            */
             this.constant = constant;
             this.linear = linear;
             this.exponent = exponent;
@@ -57,31 +46,6 @@ public class PointLight {
         this.color = new Vector3f(light.color);
         this.intensity = light.getIntensity();
         this.position = new Vector3f(light.position);
-//        TODO : FInish this and then finish RenderManager
-    }
-
-    public PointLight ToViewCoordinates(Matrix4f viewMatrix) {
-        PointLight c = new PointLight(this);
-        Vector3f lightPos = c.getPosition();
-        Vector4f aux = new Vector4f(c.getPosition(), 1);
-        aux.mul(viewMatrix);
-        lightPos.x = aux.x;
-        lightPos.y = aux.y;
-        lightPos.z = aux.z;
-        return c;
-    }
-
-    public void incPosition(Vector3f inc) {
-        position.x += inc.x;
-        position.y += inc.y;
-        position.z += inc.z;
-
-    }
-
-    public void setPosition(Vector3f pos) {
-        position.x += pos.x;
-        position.y += pos.y;
-        position.z += pos.z;
     }
 
     public Vector3f getColor() {

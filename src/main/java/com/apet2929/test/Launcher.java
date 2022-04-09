@@ -8,12 +8,12 @@ import com.apet2929.core.utils.Consts;
 public class Launcher {
 
     private static WindowManager window;
-    private static TestGame game;
+    private static ILogic game;
 
 
     public static void main(String[] args) {
         window = new WindowManager(Consts.TITLE, 1600, 900, false);
-        game = new TestGame();
+        game = new Pool();
         EngineManager engine = new EngineManager();
 
         try{

@@ -53,4 +53,5 @@ public class Model {
     public int getVertexCount() {
         return vertexCount;
     }
+
 }

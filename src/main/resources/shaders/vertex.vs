@@ -13,7 +13,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
-    vec4 mvPos = viewMatrix * vec4(position, 1.0);
+    vec4 mvPos = vec4(position, 1.0);
     gl_Position = projectionMatrix * viewMatrix * transformationMatrix * mvPos;   // Order is very important here
     fragTextureCoord = textureCoord;
     mvVertexNormal = normalize(viewMatrix * vec4(vertexNormal, 0.0)).xyz;

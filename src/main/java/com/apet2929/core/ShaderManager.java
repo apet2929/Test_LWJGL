@@ -1,7 +1,8 @@
 package com.apet2929.core;
 
 import com.apet2929.core.entity.Material;
-import com.apet2929.core.entity.PointLight;
+import com.apet2929.core.light.DirectionalLight;
+import com.apet2929.core.light.PointLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -90,6 +91,12 @@ public class ShaderManager {
         createUniform(uniformName + ".reflectance");
     }
 
+    public void createDirectionalLightUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".direction");
+        createUniform(uniformName + ".intensity");
+    }
+
     public void setUniform(String uniformName, PointLight pointLight) {
         setUniform(uniformName + ".color", pointLight.getColor());
         setUniform(uniformName + ".position", pointLight.getPosition());
@@ -106,6 +113,12 @@ public class ShaderManager {
         setUniform(uniformName + ".specular", material.getSpecularColor());
         setUniform(uniformName + ".hasTexture", material.isTextured() ? 1 : 0);
         setUniform(uniformName + ".reflectance", material.getReflectance());
+    }
+
+    public void setUniform(String uniformName, DirectionalLight dirLight) {
+        setUniform(uniformName + ".color", dirLight.getColor());
+        setUniform(uniformName + ".direction", dirLight.getDirection());
+        setUniform(uniformName + ".intensity", dirLight.getIntensity());
     }
 
     private int createShader(String shaderCode, int shaderType) throws Exception {

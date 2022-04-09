@@ -1,0 +1,53 @@
+package com.apet2929.core.light;
+
+import org.joml.Vector3f;
+
+public class DirectionalLight {
+
+    private Vector3f direction;
+    private Vector3f color;
+    private float intensity;
+
+    public DirectionalLight(Vector3f color, Vector3f direction, float intensity) {
+        this.color = color;
+        this.direction = direction;
+        this.intensity = intensity;
+    }
+
+    public DirectionalLight(DirectionalLight light) {
+        this(new Vector3f(light.getColor()), new Vector3f(light.getDirection()), light.getIntensity());
+    }
+
+    public Vector3f getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Vector3f direction) {
+        this.direction = direction;
+    }
+
+    public Vector3f getColor() {
+        return color;
+    }
+
+    public void setColor(Vector3f color) {
+        this.color = color;
+    }
+
+    public float getIntensity() {
+        return intensity;
+    }
+
+    public void setIntensity(float intensity) {
+        this.intensity = intensity;
+    }
+
+    @Override
+    public String toString() {
+        return "DirectionalLight{" +
+                "direction=" + direction +
+                ", color=" + color +
+                ", intensity=" + intensity +
+                '}';
+    }
+}

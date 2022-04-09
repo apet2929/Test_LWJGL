@@ -1,17 +1,15 @@
 package com.apet2929.core;
 
 import com.apet2929.core.entity.Entity;
-import com.apet2929.core.entity.Model;
-import com.apet2929.core.entity.PointLight;
 import com.apet2929.core.entity.Transformation;
+import com.apet2929.core.light.DirectionalLight;
+import com.apet2929.core.light.PointLight;
 import com.apet2929.core.utils.Utils;
 import com.apet2929.test.Launcher;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.*;
-
-import java.awt.*;
 
 public class RenderManager {
     private final WindowManager window;
@@ -40,6 +38,7 @@ public class RenderManager {
         shader.createUniform("specularPower");
         shader.createUniform("ambientLight");
         shader.createPointLightUniform("pointLight");
+        shader.createDirectionalLightUniform("directionalLight");
     }
 
     public void renderEntity(Entity entity, Camera camera) throws Exception {
@@ -56,9 +55,9 @@ public class RenderManager {
 
     }
 
-    public void setLighting(PointLight pointLight, Vector3f ambientLight, Camera camera) throws Exception{
+    public void setLighting(PointLight pointLight, DirectionalLight directionalLight, Vector3f ambientLight, Camera camera) throws Exception{
         if(canRender()) {
-            setLightUniforms(pointLight, ambientLight, Transformation.getViewMatrix(camera));
+            setLightUniforms(pointLight, directionalLight, ambientLight, Transformation.getViewMatrix(camera));
         } else {
             throwRenderNotStartedError();
         }
@@ -101,14 +100,31 @@ public class RenderManager {
         shader.setUniform("material", entity.getModel().getMaterial());
     }
 
-    private void setLightUniforms(PointLight light, Vector3f ambientLight, Matrix4f viewMatrix) {
+    private void setLightUniforms(PointLight pointLight, DirectionalLight directionalLight, Vector3f ambientLight, Matrix4f viewMatrix) {
         shader.setUniform("ambientLight", ambientLight);
+        shader.setUniform("directionalLight", toViewCoordinates(directionalLight, viewMatrix));
         shader.setUniform("specularPower", specularPower);
+        shader.setUniform("pointLight", toViewCoordinates(pointLight, viewMatrix));
 
+    }
 
-        PointLight viewLight = light.ToViewCoordinates(viewMatrix);
-        shader.setUniform("pointLight", viewLight);
+    private DirectionalLight toViewCoordinates(DirectionalLight dirLight, Matrix4f viewMatrix) {
+        DirectionalLight currDirLight = new DirectionalLight(dirLight);
+        Vector4f dir = new Vector4f(currDirLight.getDirection(), 0);
+        dir.mul(viewMatrix);
+        currDirLight.setDirection(new Vector3f(dir.x, dir.y, dir.z));
+        return currDirLight;
+    }
 
+    public PointLight toViewCoordinates(PointLight light, Matrix4f viewMatrix) {
+        PointLight c = new PointLight(light);
+        Vector3f lightPos = c.getPosition();
+        Vector4f aux = new Vector4f(c.getPosition(), 1);
+        aux.mul(viewMatrix);
+        lightPos.x = aux.x;
+        lightPos.y = aux.y;
+        lightPos.z = aux.z;
+        return c;
     }
 
     private void bindEntityVertices(Entity entity) {
