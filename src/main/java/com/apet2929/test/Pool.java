@@ -18,7 +18,7 @@ public class Pool implements ILogic {
     private final ModelLoader loader;
     private final WindowManager window;
 
-    Entity poolBall;
+    PoolBall poolBall;
     Entity table;
     Camera camera;
 
@@ -46,15 +46,18 @@ public class Pool implements ILogic {
         final Texture ball_tex = new Texture(loader.loadTexture("textures/tree.png"));
         Material material = new Material(ball_tex, 5.0f);
         ball_model.setMaterial(material);
-        poolBall = new Entity(ball_model);
-        poolBall.setPos(0,0,-10);
+        Entity poolBallEntity = new Entity(ball_model);
+        poolBallEntity.setPos(0,0,-10);
+        poolBall = new PoolBall(poolBallEntity);
 
         Model tableModel = loader.createModelFromFile("textures/table.obj");
         final Texture table_tex = new Texture(loader.loadTexture("textures/dirt.png"));
         material = new Material(table_tex, 0.2f);
         tableModel.setMaterial(material);
+
         table = new Entity(tableModel);
-        table.setPos(0,-1,-10);
+        table.setPos(0,-2.88f,-10);
+        table.setScale(5.0f);
 
         renderer.init();
         camera = new Camera();
@@ -62,7 +65,7 @@ public class Pool implements ILogic {
         camera.setRotation(0.72f, 2.6f, 0f);
 
         PointLight.Attenuation att = new PointLight.Attenuation(1.0f, 0.5f, 0.5f);
-        pointLight = new PointLight(new Vector3f(10.0f, 0, 0), new Vector3f(3.0f, 3.0f, 0.0f), 0.5f, att);
+        pointLight = new PointLight(new Vector3f(0.0f, 0, 0), new Vector3f(3.0f, 3.0f, 0.0f), 0.5f, att);
         ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
 
         Vector3f dirLightColor = new Vector3f(1.0f, 1.0f, 1.0f);
@@ -74,7 +77,7 @@ public class Pool implements ILogic {
 
     @Override
     public void input() {
-        float delta = 0.05f;
+
 
         cameraInc.set(0,0,0);
 
@@ -92,16 +95,23 @@ public class Pool implements ILogic {
             cameraInc.y = -1;
         if(window.isKeyPressed(GLFW.GLFW_KEY_X))
             cameraInc.y = 1;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_P))
+            poolBall.physicsBody.applyForceCenter(new Vector2f(0.1f, 0));
+        if(window.isKeyPressed(GLFW.GLFW_KEY_O))
+            poolBall.entity.setRotation(poolBall.entity.getRotation().x + 0.1f,0,0);
 
         if(window.isKeyPressed(GLFW.GLFW_KEY_ENTER)) {
-            System.out.println("camera.getPosition() = " + camera.getPosition());
-            System.out.println("camera.getRotation() = " + camera.getRotation());
+            System.out.println("poolBall vel = " + poolBall.physicsBody.getVelocity());
+            System.out.println("poolBall acc = " + poolBall.physicsBody.getAcceleration());
+            System.out.println("poolBall rot = " + poolBall.entity.getRotation());
         }
 
     }
 
     @Override
     public void update(MouseInput mouseInput) {
+        float delta = 0.05f;
+        poolBall.update(delta);
         updateDirectionalLighting();
         camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
 
@@ -117,7 +127,7 @@ public class Pool implements ILogic {
         renderer.beginRender();
         try {
             renderer.setLighting(pointLight, directionalLight, ambientLight, camera);
-            renderer.renderEntity(poolBall, camera);
+            renderer.renderEntity(poolBall.entity, camera);
             renderer.renderEntity(table, camera);
         } catch (Exception e) {
             System.out.println("e = " + e);

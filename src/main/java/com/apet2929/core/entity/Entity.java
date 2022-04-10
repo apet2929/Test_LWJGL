@@ -46,6 +46,10 @@ public class Entity {
         this.rotation.z = z;
     }
 
+    public void setScale(float scale) {
+        this.scale = scale;
+    }
+
     public Model getModel() {
         return model;
     }
