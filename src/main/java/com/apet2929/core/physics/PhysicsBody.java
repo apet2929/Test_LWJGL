@@ -24,10 +24,9 @@ public class PhysicsBody {
 
     }
 
-
-
     public void update(float delta){
         Vector2f netForce = new Vector2f(0,0);
+
         for(Vector2f force : this.forces){
             netForce = netForce.add(force);
         }
@@ -37,8 +36,12 @@ public class PhysicsBody {
         this.velocity.add(this.acceleration.x * delta, this.acceleration.y * delta);
         this.rotVel.set(this.velocity);
 
-        this.rotation.add(-this.rotVel.y * delta, -this.rotVel.x * delta);
+        this.rotation.add(this.rotVel.x * delta, this.rotVel.y * delta);
         this.position.add(this.velocity.x * delta, this.velocity.y * delta);
+    }
+
+    private void applyFriction(){
+        this.applyForceCenter(new Vector2f(-this.velocity.x));
     }
 
     public void applyForceCenter(Vector2f force) {

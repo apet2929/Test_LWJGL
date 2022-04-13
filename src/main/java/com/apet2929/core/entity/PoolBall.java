@@ -17,8 +17,8 @@ public class PoolBall {
 
     public void update(float delta){
         this.physicsBody.update(delta);
-        this.entity.setPos(this.physicsBody.getPosition().x, this.entity.getPos().y, this.physicsBody.getPosition().y);
-        this.entity.setRotation(this.physicsBody.getRotation().x * radius, this.entity.getRotation().y, this.physicsBody.getRotation().y * radius);
+        this.entity.setPos(this.physicsBody.getPosition().y, this.entity.getPos().y, -this.physicsBody.getPosition().x);
+        this.entity.setRotation(-this.physicsBody.getRotation().x * radius, this.entity.getRotation().y, -this.physicsBody.getRotation().y * radius);
     }
 
 }

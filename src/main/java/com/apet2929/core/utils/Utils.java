@@ -1,5 +1,6 @@
 package com.apet2929.core.utils;
 
+import org.joml.Vector2f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Utils {
+
+    private static final Vector2f HORIZONTAL = new Vector2f(1, 0);
 
     public static FloatBuffer storeDataInFloatBuffer(float[] data) {
         FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
@@ -53,4 +56,37 @@ public class Utils {
         scanner.close();
         return lines;
     }
+
+    public static float getAngle(Vector2f in) {
+        return in.angle(HORIZONTAL);
+    }
+
+    public static Vector2f rotate(Vector2f in, float radians) {
+        double sin = Math.sin(radians);
+        double cos = Math.cos(radians);
+        float length = in.length();
+
+        return new Vector2f((float) (length * cos), (float)(length * sin));
+    }
+    public static Vector2f incRotation(Vector2f in, float radians) {
+        double sin = Math.sin(radians);
+        double cos = Math.cos(radians);
+//newX = oldX * cos(angle) - oldY * sin(angle)
+//newY = oldX * sin(angle) + oldY * cos(angle)
+
+        double x = (in.x * cos) - (in.y * sin);
+        double y = (in.x * sin) + (in.y * cos);
+
+        return new Vector2f((float)x, (float)y);
+    }
+
+    public static Vector2f setLength(Vector2f in, float length) {
+        float angle = getAngle(in);
+
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+
+        return new Vector2f((float)(cos * length), (float)(sin * length));
+    }
+
 }
