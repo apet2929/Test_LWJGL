@@ -1,8 +1,7 @@
 package com.apet2929.core.mouse;
 
 import com.apet2929.test.Launcher;
-import org.joml.Vector2d;
-import org.joml.Vector2f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 
 public class MouseInput {
@@ -53,6 +52,8 @@ public class MouseInput {
 
     }
 
+
+
     public Vector2f getDisplVec() {
         return displVec;
     }
@@ -63,5 +64,26 @@ public class MouseInput {
 
     public boolean isRightButtonPressed() {
         return rightButtonPressed;
+    }
+
+    public Vector3f getNormalizedMousePos(int windowWidth, int windowHeight) {
+        float x = (float)(2.0f * currentPos.x) / (float) windowWidth - 1.0f;
+        float y = 1.0f - (float)(2 * currentPos.y) / (float) windowHeight;
+        float z = 1.0f;
+        return new Vector3f(x, y, z);
+    }
+
+    public Vector3f mouseToWorldCoordinates(int windowWidth, int windowHeight, Matrix4f projectionMatrix, Matrix4f viewMatrix){
+//        https://antongerdelan.net/opengl/raycasting.html
+        Vector3f nds = this.getNormalizedMousePos(windowWidth, windowHeight);
+        Vector4f ray_clip = new Vector4f(nds.x, nds.y, -1.0f, 1.0f);
+        Vector4f ray_eye = ray_clip.mul(projectionMatrix.invert());
+        ray_eye = new Vector4f(ray_eye.x, ray_eye.y, -1.0f, 0.0f);
+//        vec3 ray_wor = (inverse(view_matrix) * ray_eye).xyz;
+//// don't forget to normalise the vector at some point
+//ray_wor = normalise(ray_wor);
+        Vector4f world = ray_eye.mul(viewMatrix.invert());
+//        world.normalize();
+        return new Vector3f(world.x, world.y, world.z);
     }
 }

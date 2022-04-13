@@ -5,6 +5,7 @@ import com.apet2929.core.entity.*;
 import com.apet2929.core.light.DirectionalLight;
 import com.apet2929.core.light.PointLight;
 import com.apet2929.core.mouse.MouseInput;
+import com.apet2929.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -13,13 +14,13 @@ import static com.apet2929.core.utils.Consts.CAMERA_STEP;
 import static com.apet2929.core.utils.Consts.MOUSE_SENSITIVITY;
 
 public class Pool implements ILogic {
-
     private final RenderManager renderer;
     private final ModelLoader loader;
     private final WindowManager window;
 
     PoolBall poolBall;
     Entity table;
+    Entity arrow;
     Camera camera;
 
     PointLight pointLight;
@@ -28,41 +29,23 @@ public class Pool implements ILogic {
     DirectionalLight directionalLight;
 
     Vector3f cameraInc;
+    Vector2f aim;
 
     public Pool() {
         renderer = new RenderManager();
         window = Launcher.getWindow();
         loader = new ModelLoader();
         cameraInc = new Vector3f(0,0,0);
+        aim = new Vector2f(1, 0);
     }
 
     @Override
     public void init() throws Exception {
-        Model ball_model = loader.createModelFromFile("textures/pool_ball.obj");
-
-//        Texture texture = new Texture(loader.loadTexture("textures/tree.png"));
-//        cubeModel.setTexture(texture);
-
-        final Texture ball_tex = new Texture(loader.loadTexture("textures/tree.png"));
-        Material material = new Material(ball_tex, 5.0f);
-        ball_model.setMaterial(material);
-        Entity poolBallEntity = new Entity(ball_model);
-        poolBallEntity.setPos(0,0,-10);
-        poolBall = new PoolBall(poolBallEntity);
-
-        Model tableModel = loader.createModelFromFile("textures/table.obj");
-        final Texture table_tex = new Texture(loader.loadTexture("textures/dirt.png"));
-        material = new Material(table_tex, 0.2f);
-        tableModel.setMaterial(material);
-
-        table = new Entity(tableModel);
-        table.setPos(0,-2.88f,-10);
-        table.setScale(5.0f);
-
+        initEntities();
         renderer.init();
         camera = new Camera();
-        camera.setPosition(-0.438f, 2.127f, 1.04f);
-        camera.setRotation(0.72f, 2.6f, 0f);
+        camera.setPosition(0f, 40.0f, -15f);
+        camera.setRotation(90.52f, -90f, 0f);
 
         PointLight.Attenuation att = new PointLight.Attenuation(1.0f, 0.5f, 0.5f);
         pointLight = new PointLight(new Vector3f(0.0f, 0, 0), new Vector3f(3.0f, 3.0f, 0.0f), 0.5f, att);
@@ -71,39 +54,44 @@ public class Pool implements ILogic {
         Vector3f dirLightColor = new Vector3f(1.0f, 1.0f, 1.0f);
         Vector3f dirLightDirection = new Vector3f(0.0f, 0.0f, 0.0f);
         float dirLightIntensity = 0.5f;
-        lightAngle = 0.0f;
+        lightAngle = -20.0f;
         directionalLight = new DirectionalLight(dirLightColor, dirLightDirection, dirLightIntensity);
+        updateDirectionalLighting();
     }
 
     @Override
     public void input() {
-
-
         cameraInc.set(0,0,0);
 
         if(window.isKeyPressed(GLFW.GLFW_KEY_W))
-            cameraInc.z = -1;
+            aim = Utils.setLength(aim, aim.length() + 0.05f);
         if(window.isKeyPressed(GLFW.GLFW_KEY_S))
-            cameraInc.z = 1;
+            aim = Utils.setLength(aim, aim.length() - 0.05f);
 
         if(window.isKeyPressed(GLFW.GLFW_KEY_A))
-            cameraInc.x = -1;
+            aim = Utils.incRotation(aim, -0.015f);
         if(window.isKeyPressed(GLFW.GLFW_KEY_D))
-            cameraInc.x = 1;
+            aim = Utils.incRotation(aim, 0.015f);
 
-        if(window.isKeyPressed(GLFW.GLFW_KEY_Z))
-            cameraInc.y = -1;
-        if(window.isKeyPressed(GLFW.GLFW_KEY_X))
-            cameraInc.y = 1;
         if(window.isKeyPressed(GLFW.GLFW_KEY_P))
-            poolBall.physicsBody.applyForceCenter(new Vector2f(0.1f, 0));
+            poolBall.physicsBody.applyForceCenter(aim);
         if(window.isKeyPressed(GLFW.GLFW_KEY_O))
-            poolBall.entity.setRotation(poolBall.entity.getRotation().x + 0.1f,0,0);
+            poolBall.physicsBody.setPosition(new Vector2f(0,0));
 
         if(window.isKeyPressed(GLFW.GLFW_KEY_ENTER)) {
-            System.out.println("poolBall vel = " + poolBall.physicsBody.getVelocity());
-            System.out.println("poolBall acc = " + poolBall.physicsBody.getAcceleration());
-            System.out.println("poolBall rot = " + poolBall.entity.getRotation());
+//            System.out.println("poolBall vel = " + poolBall.physicsBody.getVelocity());
+//            System.out.println("poolBall acc = " + poolBall.physicsBody.getAcceleration());
+//            System.out.println("poolBall rot = " + poolBall.entity.getRotation());
+//            System.out.println("lightAngle = " + lightAngle);
+//            System.out.println("camera.getRotation() = " + camera.getRotation());
+//            System.out.println("camera.getPosition() = " + camera.getPosition());
+            System.out.println("arrow.getPos() = " + arrow.getPos());
+            System.out.println("aim = " + aim);
+            System.out.println("Utils.getAngle(aim) = " + Utils.getAngle(aim));
+
+            Vector2f angled = new Vector2f(-3,1);
+            System.out.println("Utils.getAngle(angled) = " + Math.toDegrees(Utils.getAngle(angled)));
+
         }
 
     }
@@ -112,13 +100,9 @@ public class Pool implements ILogic {
     public void update(MouseInput mouseInput) {
         float delta = 0.05f;
         poolBall.update(delta);
-        updateDirectionalLighting();
         camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
+        updateArrow();
 
-        if(mouseInput.isLeftButtonPressed()) {
-            Vector2f rotVec = mouseInput.getDisplVec();
-            camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
-        }
     }
 
     @Override
@@ -129,6 +113,7 @@ public class Pool implements ILogic {
             renderer.setLighting(pointLight, directionalLight, ambientLight, camera);
             renderer.renderEntity(poolBall.entity, camera);
             renderer.renderEntity(table, camera);
+            renderer.renderEntity(arrow, camera);
         } catch (Exception e) {
             System.out.println("e = " + e);
         }
@@ -142,7 +127,7 @@ public class Pool implements ILogic {
     }
 
     private void updateDirectionalLighting() {
-        lightAngle += 1.1f;
+
         if (lightAngle > 90) {
             directionalLight.setIntensity(0);
             if (lightAngle >= 360) {
@@ -162,5 +147,36 @@ public class Pool implements ILogic {
         double angRad = Math.toRadians(lightAngle);
         directionalLight.getDirection().x = (float) Math.sin(angRad);
         directionalLight.getDirection().y = (float) Math.cos(angRad);
+    }
+
+    private void initEntities() throws Exception{
+        Model ball_model = loader.createModelFromFile("textures/pool_ball.obj");
+        final Texture ball_tex = new Texture(loader.loadTexture("textures/tree.png"));
+        Material material = new Material(ball_tex, 5.0f);
+        ball_model.setMaterial(material);
+        Entity poolBallEntity = new Entity(ball_model);
+        poolBallEntity.setPos(0,0,-10);
+        poolBall = new PoolBall(poolBallEntity);
+
+        Model tableModel = loader.createModelFromFile("textures/table.obj");
+        final Texture table_tex = new Texture(loader.loadTexture("textures/dirt.png"));
+        material = new Material(table_tex, 0.2f);
+        tableModel.setMaterial(material);
+        table = new Entity(tableModel);
+        table.setPos(0,-2.88f,-10);
+        table.setScale(new Vector3f(10, 0.5f, 10f));
+
+        Model arrowModel = loader.createModelFromFile("textures/arrow.obj");
+        material = new Material(table_tex, 0.5f);
+        arrowModel.setMaterial(material);
+        arrow = new Entity(arrowModel);
+
+
+    }
+
+    private void updateArrow(){
+        arrow.setPos(poolBall.entity.getPos());
+        arrow.setScale(arrow.getScale().x, arrow.getScale().y, aim.length());
+        arrow.setRotation(0, (float) Math.toDegrees(Utils.getAngle(aim)), 0);
     }
 }

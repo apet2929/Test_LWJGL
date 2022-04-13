@@ -137,14 +137,6 @@ public class ModelLoader {
         return new Face(tokens[1], tokens[2], tokens[3]);
     }
 
-//    public Cube loadCube(Vector3f position, Vector3f rotation, float scale) {
-//        return new Cube(loadModel(Cube.vertices, Cube.textCoords, Cube.indices), position, rotation, scale);
-//    }
-//
-//    public Cube loadCube() {
-//        return new Cube(loadModel(Cube.vertices, Cube.textCoords, Cube.indices), new Vector3f(0,0,0), new Vector3f(0,0,0), 1);
-//    }
-
     public int loadTexture(String filename) throws Exception {
         int width, height;
         ByteBuffer buffer;
