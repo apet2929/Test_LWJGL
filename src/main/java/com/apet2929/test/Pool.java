@@ -14,6 +14,7 @@ import static com.apet2929.core.utils.Consts.CAMERA_STEP;
 import static com.apet2929.core.utils.Consts.MOUSE_SENSITIVITY;
 
 public class Pool implements ILogic {
+
     private final RenderManager renderer;
     private final ModelLoader loader;
     private final WindowManager window;
@@ -21,6 +22,8 @@ public class Pool implements ILogic {
     PoolBall poolBall;
     Entity table;
     Entity arrow;
+    Entity walls;
+
     Camera camera;
 
     PointLight pointLight;
@@ -31,12 +34,15 @@ public class Pool implements ILogic {
     Vector3f cameraInc;
     Vector2f aim;
 
+    boolean cameraControls;
+
     public Pool() {
         renderer = new RenderManager();
         window = Launcher.getWindow();
         loader = new ModelLoader();
         cameraInc = new Vector3f(0,0,0);
         aim = new Vector2f(1, 0);
+        cameraControls = false;
     }
 
     @Override
@@ -45,7 +51,7 @@ public class Pool implements ILogic {
         renderer.init();
         camera = new Camera();
         camera.setPosition(0f, 40.0f, -15f);
-        camera.setRotation(90.52f, -90f, 0f);
+        camera.setRotation(90.52f, 0f, 0f);
 
         PointLight.Attenuation att = new PointLight.Attenuation(1.0f, 0.5f, 0.5f);
         pointLight = new PointLight(new Vector3f(0.0f, 0, 0), new Vector3f(3.0f, 3.0f, 0.0f), 0.5f, att);
@@ -63,28 +69,17 @@ public class Pool implements ILogic {
     public void input() {
         cameraInc.set(0,0,0);
 
-        if(window.isKeyPressed(GLFW.GLFW_KEY_W))
-            aim = Utils.setLength(aim, aim.length() + 0.05f);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_S))
-            aim = Utils.setLength(aim, aim.length() - 0.05f);
+        if(cameraControls) {
+            cameraControls();
+        } else {
+            gameControls();
+        }
+        if(window.isKeyJustPressed(GLFW.GLFW_KEY_LEFT_SHIFT)){
+            System.out.println("Camera controls switching");
+            cameraControls = !cameraControls;
+        }
 
-        if(window.isKeyPressed(GLFW.GLFW_KEY_A))
-            aim = Utils.incRotation(aim, -0.015f);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_D))
-            aim = Utils.incRotation(aim, 0.015f);
-
-        if(window.isKeyPressed(GLFW.GLFW_KEY_P))
-            poolBall.physicsBody.applyForceCenter(aim);
-        if(window.isKeyPressed(GLFW.GLFW_KEY_O))
-            poolBall.physicsBody.setPosition(new Vector2f(0,0));
-
-        if(window.isKeyPressed(GLFW.GLFW_KEY_ENTER)) {
-//            System.out.println("poolBall vel = " + poolBall.physicsBody.getVelocity());
-//            System.out.println("poolBall acc = " + poolBall.physicsBody.getAcceleration());
-//            System.out.println("poolBall rot = " + poolBall.entity.getRotation());
-//            System.out.println("lightAngle = " + lightAngle);
-//            System.out.println("camera.getRotation() = " + camera.getRotation());
-//            System.out.println("camera.getPosition() = " + camera.getPosition());
+        if(window.isKeyJustPressed(GLFW.GLFW_KEY_ENTER)) {
             System.out.println("arrow.getPos() = " + arrow.getPos());
             System.out.println("aim = " + aim);
             System.out.println("Utils.getAngle(aim) = " + Utils.getAngle(aim));
@@ -99,9 +94,16 @@ public class Pool implements ILogic {
     @Override
     public void update(MouseInput mouseInput) {
         float delta = 0.05f;
-        poolBall.update(delta);
+        poolBall.update(delta, walls);
         camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
         updateArrow();
+
+        if(cameraControls) {
+            if(mouseInput.isLeftButtonPressed()) {
+                Vector2f rotVec = mouseInput.getDisplVec();
+                camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+            }
+        }
 
     }
 
@@ -114,6 +116,7 @@ public class Pool implements ILogic {
             renderer.renderEntity(poolBall.entity, camera);
             renderer.renderEntity(table, camera);
             renderer.renderEntity(arrow, camera);
+            renderer.renderEntity(walls, camera);
         } catch (Exception e) {
             System.out.println("e = " + e);
         }
@@ -155,7 +158,7 @@ public class Pool implements ILogic {
         Material material = new Material(ball_tex, 5.0f);
         ball_model.setMaterial(material);
         Entity poolBallEntity = new Entity(ball_model);
-        poolBallEntity.setPos(0,0,-10);
+        poolBallEntity.setPos(0,0,0);
         poolBall = new PoolBall(poolBallEntity);
 
         Model tableModel = loader.createModelFromFile("textures/table.obj");
@@ -171,12 +174,51 @@ public class Pool implements ILogic {
         arrowModel.setMaterial(material);
         arrow = new Entity(arrowModel);
 
+        walls = new Entity(tableModel);
+        walls.setPos(0, 0f, -30f);
+        walls.setScale(10, 10, 1);
+        walls.setRotation(0f, 0f, 0f);
+        walls.getCollisionRect().height = 10;
+        walls.getCollisionRect().width = 100;
 
     }
 
     private void updateArrow(){
         arrow.setPos(poolBall.entity.getPos());
         arrow.setScale(arrow.getScale().x, arrow.getScale().y, aim.length());
-        arrow.setRotation(0, (float) Math.toDegrees(Utils.getAngle(aim)), 0);
+        arrow.setRotation(0, (float) Math.toDegrees(Utils.getAngle(aim))-90, 0);
+    }
+
+    private void gameControls() {
+        if(window.isKeyPressed(GLFW.GLFW_KEY_W))
+            aim = Utils.setLength(aim, aim.length() + 0.05f);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_S))
+            aim = Utils.setLength(aim, aim.length() - 0.05f);
+
+        if(window.isKeyPressed(GLFW.GLFW_KEY_A))
+            aim = Utils.incRotation(aim, -0.015f);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_D))
+            aim = Utils.incRotation(aim, 0.015f);
+
+        if(window.isKeyPressed(GLFW.GLFW_KEY_P))
+            poolBall.physicsBody.applyForceCenter(aim);
+        if(window.isKeyPressed(GLFW.GLFW_KEY_O))
+            poolBall.physicsBody.setPosition(new Vector2f(0,0));
+    }
+    private void cameraControls() {
+        if(window.isKeyPressed(GLFW.GLFW_KEY_W))
+            cameraInc.z = -1;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_S))
+            cameraInc.z = 1;
+
+        if(window.isKeyPressed(GLFW.GLFW_KEY_A))
+            cameraInc.x = -1;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_D))
+            cameraInc.x = 1;
+
+        if(window.isKeyPressed(GLFW.GLFW_KEY_Z))
+            cameraInc.y = -1;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_X))
+            cameraInc.y = 1;
     }
 }

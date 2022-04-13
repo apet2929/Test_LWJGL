@@ -1,11 +1,12 @@
 package com.apet2929.core.physics;
 
+import com.apet2929.core.utils.Consts;
 import org.joml.Vector2f;
 
 import java.util.ArrayList;
 
 public class PhysicsBody {
-    private Vector2f position;
+    private Box2D collisionRect;
     private Vector2f rotation;
     private Vector2f velocity;
     private Vector2f rotVel;
@@ -13,8 +14,8 @@ public class PhysicsBody {
     private ArrayList<Vector2f> forces;
     private final float mass;
 
-    public PhysicsBody(Vector2f position, float mass) {
-        this.position = position;
+    public PhysicsBody(Box2D collisionRect, float mass) {
+        this.collisionRect = collisionRect;
         this.rotation = new Vector2f(0,0);
         this.rotVel = new Vector2f(0,0);
         this.mass = mass;
@@ -24,9 +25,10 @@ public class PhysicsBody {
 
     }
 
-    public void update(float delta){
+    public void update(float delta, Box2D walls){
+        applyFriction();
+        collide(walls);
         Vector2f netForce = new Vector2f(0,0);
-
         for(Vector2f force : this.forces){
             netForce = netForce.add(force);
         }
@@ -36,12 +38,22 @@ public class PhysicsBody {
         this.velocity.add(this.acceleration.x * delta, this.acceleration.y * delta);
         this.rotVel.set(this.velocity);
 
-        this.rotation.add(this.rotVel.x * delta, this.rotVel.y * delta);
-        this.position.add(this.velocity.x * delta, this.velocity.y * delta);
+        this.rotation.add(-this.rotVel.y * delta, this.rotVel.x * delta);
+        this.collisionRect.origin.add(this.velocity.x * delta, this.velocity.y * delta);
+    }
+
+    private void collide(Box2D other) {
+        boolean collided = other.checkCollision(this.collisionRect);
+        if(collided) {
+            if(Consts.DEBUG){
+                System.out.println("Collided!");
+            }
+            this.velocity.mul(-1);
+        }
     }
 
     private void applyFriction(){
-        this.applyForceCenter(new Vector2f(-this.velocity.x));
+        this.applyForceCenter(new Vector2f(-this.velocity.x * 0.05f, -this.velocity.y * 0.05f));
     }
 
     public void applyForceCenter(Vector2f force) {
@@ -50,11 +62,11 @@ public class PhysicsBody {
     }
 
     public Vector2f getPosition() {
-        return position;
+        return this.collisionRect.origin;
     }
 
     public void setPosition(Vector2f position) {
-        this.position = position;
+        this.collisionRect.origin = position;
     }
 
     public Vector2f getVelocity() {

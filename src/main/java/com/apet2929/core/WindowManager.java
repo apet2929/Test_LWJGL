@@ -9,6 +9,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
+
+import java.util.HashMap;
+
 import static com.apet2929.core.utils.Consts.*;
 
 public class WindowManager {
@@ -21,6 +24,7 @@ public class WindowManager {
     private boolean resize, vSync;
 
     private final Matrix4f projectionMatrix;
+    private HashMap<Integer, Integer> keyStates;
 
     public WindowManager(String title, int width, int height, boolean vSync) {
         this.title = title;
@@ -28,10 +32,10 @@ public class WindowManager {
         this.height = height;
         this.vSync = vSync;
         projectionMatrix = new Matrix4f();
+        this.keyStates = new HashMap<>();
+        initKeyStates();
 
     }
-
-
 
     public void init(){
         GLFWErrorCallback.createPrint(System.err).set();
@@ -89,9 +93,6 @@ public class WindowManager {
         GL11.glClearColor(0.0f,0.0f,0.0f,0.0f);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL11.GL_STENCIL_TEST);
-//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-//        GL11.glEnable(GL11.GL_CULL_FACE);
-//        GL11.glEnable(GL11.GL_BACK);
     }
 
     public void update() {
@@ -108,7 +109,24 @@ public class WindowManager {
     }
 
     public boolean isKeyPressed(int keycode) {
-        return GLFW.glfwGetKey(window, keycode) == GLFW.GLFW_PRESS;
+        return pollKey(keycode) == GLFW.GLFW_PRESS;
+    }
+
+    public boolean isKeyReleased(int keycode) {
+        return pollKey(keycode) == GLFW.GLFW_RELEASE;
+    }
+
+    public boolean isKeyJustPressed(int keycode) {
+//        Might work?
+        int lastState = keyStates.get(keycode);
+        return (pollKey(keycode) == GLFW.GLFW_PRESS && lastState == GLFW.GLFW_RELEASE);
+
+    }
+
+    private int pollKey(int keycode) {
+        int keyState = GLFW.glfwGetKey(window, keycode);
+        keyStates.replace(keycode, keyState);
+        return keyState;
     }
 
     public boolean windowShouldClose() {
@@ -163,5 +181,14 @@ public class WindowManager {
     public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
         float aspectRatio = (float) width / height;
         return matrix.setPerspective(FOV, aspectRatio, Z_NEAR, Z_FAR);
+    }
+
+    private void initKeyStates(){
+        for(int i = 0; i < 96; i++){
+            keyStates.put(i, GLFW.GLFW_RELEASE);
+        }
+        for(int i = 256; i < 348; i++){
+            keyStates.put(i, GLFW.GLFW_RELEASE);
+        }
     }
 }
